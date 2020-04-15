@@ -1,18 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import {
-	View,
-	ImageBackground,
-	StyleSheet,
-	Image,
-	TouchableOpacity,
-	Text,
-} from 'react-native';
+import { View, StyleSheet, Image, TouchableOpacity, Text } from 'react-native';
 import { Camera } from 'expo-camera';
 
 let camera: Camera | null = null;
 export default () => {
 	const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-	// const [type, setType] = useState(Camera.Constants.Type.back);
 
 	useEffect(() => {
 		(async () => {
@@ -41,6 +33,7 @@ export default () => {
 					<TouchableOpacity
 						onPress={async () => {
 							let photo = await camera?.takePictureAsync();
+							//TODO Fix something here
 						}}
 					>
 						<Image

@@ -8,6 +8,7 @@
     "eject": "expo eject"
   },
   "dependencies": {
+    "@types/react-navigation": "^3.4.0",
     "expand-brackets": "^4.0.0",
     "expo": "~37.0.3",
     "expo-camera": "~8.2.0",
