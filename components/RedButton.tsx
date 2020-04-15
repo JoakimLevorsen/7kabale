@@ -34,5 +34,7 @@ const styles = StyleSheet.create({
 		shadowColor: '#000000',
 		shadowOpacity: 0.25,
 		shadowOffset: { width: 0, height: 4 },
+		display: 'flex',
+		flexDirection: 'row',
 	},
 });
