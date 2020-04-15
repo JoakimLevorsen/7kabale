@@ -1,45 +1,69 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
 	View,
 	ImageBackground,
 	StyleSheet,
 	Image,
 	TouchableOpacity,
+	Text,
 } from 'react-native';
+import { Camera } from 'expo-camera';
 
-export default () => (
-	<View style={styles.container}>
-		<ImageBackground
-			source={require('../assets/placeholderMainScreen.jpg')}
-			style={styles.backgroundImage}
-		>
-			<TouchableOpacity
-				onPress={() =>
-					console.log('Did Work Amaze Camera Button Yes Timmy')
-				}
+let camera: Camera | null = null;
+export default () => {
+	const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+	// const [type, setType] = useState(Camera.Constants.Type.back);
+
+	useEffect(() => {
+		(async () => {
+			const { status } = await Camera.requestPermissionsAsync();
+			setHasPermission(status === 'granted');
+		})();
+	}, []);
+
+	if (hasPermission === null) {
+		return <View />;
+	}
+	if (hasPermission === false) {
+		return <Text>No access to camera!</Text>;
+	}
+
+	return (
+		<View style={styles.container}>
+			<Camera
+				style={styles.container}
+				type={Camera.Constants.Type.back}
+				ref={ref => {
+					camera = ref;
+				}}
 			>
-				<Image
-					source={require('../assets/cameraButton.png')}
-					style={styles.cameraImage}
-				></Image>
-			</TouchableOpacity>
-		</ImageBackground>
-	</View>
-);
+				<View style={[styles.container, styles.buttonView]}>
+					<TouchableOpacity
+						onPress={async () => {
+							let photo = await camera?.takePictureAsync();
+						}}
+					>
+						<Image
+							source={require('../assets/cameraButton.png')}
+							style={styles.cameraImage}
+						></Image>
+					</TouchableOpacity>
+				</View>
+			</Camera>
+		</View>
+	);
+};
 
 const styles = StyleSheet.create({
 	container: {
 		justifyContent: 'center',
 		display: 'flex',
 		alignItems: 'center',
+		width: '100%',
 		flex: 1,
 	},
-
-	backgroundImage: {
-		width: '100%',
-		height: '100%',
+	buttonView: {
 		justifyContent: 'flex-end',
-		alignItems: 'center',
 	},
 	cameraImage: {
 		width: 100,
