@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Image, TouchableOpacity, Text } from 'react-native';
-import { Camera } from 'expo-camera';
+import { Camera, CameraCapturedPicture } from 'expo-camera';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 let camera: Camera | null = null;
 export default () => {
 	const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+	const navigation = useNavigation();
+	const route = useRoute();
 
 	useEffect(() => {
 		(async () => {
@@ -33,6 +36,9 @@ export default () => {
 					<TouchableOpacity
 						onPress={async () => {
 							let photo = await camera?.takePictureAsync();
+							navigation.navigate('ChoozPic', { photo });
+							const photo2 = (route.params! as any)
+								.photo as CameraCapturedPicture;
 							//TODO Fix something here
 						}}
 					>
