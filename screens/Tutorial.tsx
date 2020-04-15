@@ -1,14 +1,18 @@
-import React, { useRef, useState } from 'react';
+import React from 'react';
 import RedButton from '../components/RedButton';
-import { SafeAreaView, NavigationProp } from 'react-navigation';
+import { SafeAreaView } from 'react-navigation';
 import { Colors, FontSize } from '../constants';
 import CardView from '../components/CardView';
 import CustomText from '../components/CustomText';
 import Spacer from '../components/Spacer';
-import { Animated, ViewProps, ViewStyle, Dimensions } from 'react-native';
+import { Animated, Dimensions } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { AppStackParamlist } from '../AppNavigator';
 
-export type TutorialNavigationProp = StackNavigationProp<{ Main: {} }>;
+export type TutorialNavigationProp = StackNavigationProp<
+	AppStackParamlist,
+	'Tutorial'
+>;
 
 interface Props {
 	navigation: TutorialNavigationProp;
