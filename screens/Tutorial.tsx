@@ -17,6 +17,12 @@ export type TutorialNavigationProp = StackNavigationProp<
 interface Props {
 	navigation: TutorialNavigationProp;
 }
+/* TODO:
+- Ikke al teksten "Introduktion"/"Quick Tutorial" bliver vist
+- Ovenstående gælder også for "Tag et billede af din kabale" teksten
+- Alle anim's måtte gerne hæves lidt over knappen og tættere på overskrift/titel
+- Tilføj start-oversigt over de 3 trin ala Figma
+*/
 
 export default class Tutorial extends React.Component<Props> {
 	state = {
@@ -44,7 +50,7 @@ export default class Tutorial extends React.Component<Props> {
 					color={Colors.white}
 					flex={0}
 				>
-					Quick tutorial
+					Introduktion
 				</CustomText>
 				<CardView
 					number={1}
@@ -73,7 +79,7 @@ export default class Tutorial extends React.Component<Props> {
 				/>
 				<RedButton
 					style={{ marginTop: 20 }}
-					title="Knappen"
+					title="Næste"
 					onPress={() => {
 						const animationState = this.state.animationState + 1;
 						switch (animationState) {

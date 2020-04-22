@@ -36,5 +36,7 @@ const styles = StyleSheet.create({
 		shadowOffset: { width: 0, height: 4 },
 		display: 'flex',
 		flexDirection: 'row',
+		minWidth: 40,
+		minHeight: 20,
 	},
 });

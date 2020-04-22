@@ -1,8 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Image, TouchableOpacity, Text } from 'react-native';
+import {
+	View,
+	StyleSheet,
+	Image,
+	TouchableOpacity,
+	Text,
+	Dimensions,
+} from 'react-native';
 import { Camera } from 'expo-camera';
 import { useNavigation } from '@react-navigation/native';
 
+/* TODO:
+- Lav en simpel loading anim der popper op onpress før navigation (der går lige et sekund inden skærmskifte)
+- For some reason virker det kamera-view man ser at være lidt underligt stretched/distorted
+*/
 let camera: Camera | null = null;
 export default () => {
 	const [hasPermission, setHasPermission] = useState<boolean | null>(null);
