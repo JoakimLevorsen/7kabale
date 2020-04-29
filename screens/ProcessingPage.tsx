@@ -5,16 +5,15 @@ import {
 	ActivityIndicator,
 	StyleSheet,
 	Animated,
-	Text,
 	FlatList,
 	Image,
 } from 'react-native';
-import { RouteProp } from '@react-navigation/native';
+import { RouteProp, useNavigation } from '@react-navigation/native';
 import { AppStackParamList } from '../AppNavigator';
 import { Colors, FontSize } from '../constants';
 import CustomText from '../components/CustomText';
-import RedButton from '../components/RedButton';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { StackNavigationProp } from '@react-navigation/stack';
 
 interface Props {
 	route: RouteProp<AppStackParamList, 'Loading'>;
@@ -47,11 +46,14 @@ const suitIcons = [
 	require('../assets/spadesWhite.png'),
 ];
 
+type NavStack = StackNavigationProp<AppStackParamList>;
+
 export default ({ route }: Props) => {
 	const photo = route.params.photo;
 	const [identifyAnimation, setIndentifyAnimation] = useState(
 		new Animated.Value(0)
 	);
+	const navigation = useNavigation<NavStack>();
 
 	const [identifiedType, setIdentifiedType] = useState<CardType>('Ace');
 	const [identifiedSuit, setIdentifiedSuit] = useState<Suit>('Club');
@@ -87,7 +89,13 @@ export default ({ route }: Props) => {
 					},
 				]}
 			>
-				<View style={{ flexDirection: 'row', alignItems: 'center' }}>
+				<View
+					style={{
+						flexDirection: 'row',
+						alignItems: 'center',
+						marginBottom: 10,
+					}}
+				>
 					<CustomText
 						style={{ margin: 20 }}
 						fontSize={FontSize.header}
@@ -105,6 +113,7 @@ export default ({ route }: Props) => {
 							borderRadius: 20,
 							marginRight: 10,
 						}}
+						onPress={() => navigation.navigate('GameGuidePage')}
 					>
 						<Image
 							source={require('../assets/arrowForwardWhite.png')}
@@ -140,20 +149,6 @@ export default ({ route }: Props) => {
 								source={suitIcons[index]}
 							/>
 						</TouchableOpacity>
-						// <RedButton
-						// 	key={suit}
-						// 	fontSize={12}
-						// 	style={{
-						// 		flex: 1,
-						// 		margin: 5,
-						// 		backgroundColor:
-						// 			suit === identifiedSuit
-						// 				? Colors.green
-						// 				: Colors.black,
-						// 	}}
-						// 	title={suit}
-						// 	onPress={() => setIdentifiedSuit(suit)}
-						// />
 					))}
 				</View>
 				<FlatList

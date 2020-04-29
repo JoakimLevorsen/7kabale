@@ -82,10 +82,9 @@ export default class Tutorial extends React.Component<Props> {
 					flex={1}
 					minHeight={Dimensions.get('screen').height * 0.7}
 				/>
-				<Spacer flex={0} minHeight={30} />
 				<RedButton
 					style={{ marginTop: 20 }}
-					title="Næste"
+					title={this.state.animationState >= 3 ? 'Færdig' : 'Næste'}
 					onPress={() => {
 						const animationState = this.state.animationState + 1;
 						switch (animationState) {

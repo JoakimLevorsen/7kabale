@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
 		position: 'absolute',
 		aspectRatio: 300 / 460,
 		maxWidth: '80%',
-		top: 150,
+		top: 120,
 		backgroundColor: Colors.white,
 		display: 'flex',
 		borderRadius: 20,

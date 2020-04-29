@@ -9,8 +9,7 @@ import Spacer from '../components/Spacer';
 import { AppStackParamList } from '../AppNavigator';
 
 /* TODO:
-- Check-text viser ikke hele string ("Er billedet i fokus...") (Fixed?)
-- "JA" Knap impl. mangler
+- Ikke al teksten "Er billedet i fokus..." bliver vist
 */
 
 interface Props {
@@ -35,7 +34,6 @@ export default ({ route }: Props) => {
 						navigation.navigate('Main');
 					}}
 				/>
-				<Spacer flex={1} minHeight={5} minWidth={5}></Spacer>
 				<RedButton
 					style={styles.smallerButtons}
 					title="JA"
@@ -58,18 +56,21 @@ const styles = StyleSheet.create({
 	photo: {
 		flex: 10,
 		aspectRatio: 3 / 4,
-		margin: 40,
+		marginTop: 30,
 	},
 	amazingText: {
 		color: Colors.white,
 		flex: 1,
+		marginTop: 20,
 	},
 	horizontalView: {
 		flexDirection: 'row',
+		marginLeft: 30,
 	},
 	smallerButtons: {
-		minWidth: 100,
-		flex: 10,
-		margin: 10,
+		minWidth: 50,
+		flex: 1,
+		marginRight: 30,
+		marginBottom: 30,
 	},
 });
