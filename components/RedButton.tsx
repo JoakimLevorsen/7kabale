@@ -14,14 +14,21 @@ interface Props {
 	onPress: ButtonProps['onPress'];
 	style?: ViewProps['style'];
 	padding?: number;
+	fontSize?: FontSize | number;
 }
 
-export default ({ title, onPress, style, padding = 20 }: Props) => (
+export default ({
+	title,
+	onPress,
+	style,
+	padding = 20,
+	fontSize = FontSize.body,
+}: Props) => (
 	<TouchableOpacity
 		style={[styles.container, style, { padding }]}
 		onPress={onPress}
 	>
-		<CustomText color={Colors.white} fontSize={FontSize.body}>
+		<CustomText color={Colors.white} fontSize={fontSize}>
 			{title}
 		</CustomText>
 	</TouchableOpacity>

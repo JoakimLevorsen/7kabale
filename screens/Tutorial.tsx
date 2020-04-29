@@ -7,10 +7,10 @@ import CustomText from '../components/CustomText';
 import Spacer from '../components/Spacer';
 import { Animated, Dimensions } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { AppStackParamlist } from '../AppNavigator';
+import { AppStackParamList } from '../AppNavigator';
 
 export type TutorialNavigationProp = StackNavigationProp<
-	AppStackParamlist,
+	AppStackParamList,
 	'Tutorial'
 >;
 

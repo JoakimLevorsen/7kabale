@@ -1,21 +1,26 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { CameraCapturedPicture } from 'expo-camera';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { Colors } from '../constants';
 import CustomText from '../components/CustomText';
 import RedButton from '../components/RedButton';
 import Spacer from '../components/Spacer';
+import { AppStackParamList } from '../AppNavigator';
 
 /* TODO:
 - Check-text viser ikke hele string ("Er billedet i fokus...") (Fixed?)
 - "JA" Knap impl. mangler
 */
-export default () => {
-	const route = useRoute();
+
+interface Props {
+	route: RouteProp<AppStackParamList, 'ChoozPic'>;
+}
+
+export default ({ route }: Props) => {
 	const navigation = useNavigation();
 
-	const photo = (route.params! as any).photo as CameraCapturedPicture;
+	const photo = route.params.photo;
 	return (
 		<View style={styles.container}>
 			<Image source={photo} style={styles.photo}></Image>
@@ -34,9 +39,7 @@ export default () => {
 				<RedButton
 					style={styles.smallerButtons}
 					title="JA"
-					onPress={() => {
-						console.log('JA, IMPLEMENTER MIG LIGE');
-					}}
+					onPress={() => navigation.navigate('Loading', { photo })}
 				/>
 			</View>
 		</View>
