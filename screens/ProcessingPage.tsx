@@ -7,6 +7,7 @@ import {
 	Animated,
 	Text,
 	FlatList,
+	Image,
 } from 'react-native';
 import { RouteProp } from '@react-navigation/native';
 import { AppStackParamList } from '../AppNavigator';
@@ -24,7 +25,6 @@ type Suit = typeof allSuits[number];
 
 const allCardTypes = [
 	'Ace',
-	'1',
 	'2',
 	'3',
 	'4',
@@ -39,6 +39,13 @@ const allCardTypes = [
 	'King',
 ] as const;
 type CardType = typeof allCardTypes[number];
+
+const suitIcons = [
+	require('../assets/heartWhite.png'),
+	require('../assets/clubsWhite.png'),
+	require('../assets/diamondsWhite.png'),
+	require('../assets/spadesWhite.png'),
+];
 
 export default ({ route }: Props) => {
 	const photo = route.params.photo;
@@ -80,33 +87,77 @@ export default ({ route }: Props) => {
 					},
 				]}
 			>
-				<View style={{ flexDirection: 'row' }}>
+				<View style={{ flexDirection: 'row', alignItems: 'center' }}>
 					<CustomText
 						style={{ margin: 20 }}
 						fontSize={FontSize.header}
+						textAlign="left"
 					>
 						Er dette {identifiedSuit} {identifiedType}?
 					</CustomText>
+					<TouchableOpacity
+						style={{
+							height: 40,
+							width: 40,
+							justifyContent: 'center',
+							alignItems: 'center',
+							backgroundColor: Colors.black,
+							borderRadius: 20,
+							marginRight: 10,
+						}}
+					>
+						<Image
+							source={require('../assets/arrowForwardWhite.png')}
+						/>
+					</TouchableOpacity>
 				</View>
-				<View style={{ flexDirection: 'row' }}>
-					{allSuits.map(suit => (
-						<RedButton
+				<View
+					style={{
+						flexDirection: 'row',
+						marginHorizontal: 15,
+						justifyContent: 'space-between',
+					}}
+				>
+					{allSuits.map((suit, index) => (
+						<TouchableOpacity
 							key={suit}
-							fontSize={12}
 							style={{
-								flex: 1,
-								margin: 5,
+								height: 70,
+								width: 70,
+								justifyContent: 'center',
+								alignItems: 'center',
 								backgroundColor:
 									suit === identifiedSuit
 										? Colors.green
 										: Colors.black,
+								borderRadius: 35,
+								marginRight: 10,
 							}}
-							title={suit}
 							onPress={() => setIdentifiedSuit(suit)}
-						/>
+						>
+							<Image
+								style={{ height: 50, width: 50 }}
+								source={suitIcons[index]}
+							/>
+						</TouchableOpacity>
+						// <RedButton
+						// 	key={suit}
+						// 	fontSize={12}
+						// 	style={{
+						// 		flex: 1,
+						// 		margin: 5,
+						// 		backgroundColor:
+						// 			suit === identifiedSuit
+						// 				? Colors.green
+						// 				: Colors.black,
+						// 	}}
+						// 	title={suit}
+						// 	onPress={() => setIdentifiedSuit(suit)}
+						// />
 					))}
 				</View>
 				<FlatList
+					style={{ marginHorizontal: 10 }}
 					data={allCardTypes}
 					keyExtractor={v => v}
 					renderItem={({ item }) => (
@@ -118,15 +169,21 @@ export default ({ route }: Props) => {
 							<CustomText textAlign="left">{item}</CustomText>
 							<View
 								style={{
-									height: 30,
-									width: 30,
-									borderRadius: 15,
+									height: 40,
+									width: 40,
+									borderRadius: 20,
 									backgroundColor:
 										item === identifiedType
 											? Colors.green
 											: Colors.black,
 								}}
-							/>
+							>
+								{item === identifiedType && (
+									<Image
+										source={require('../assets/checkWhite.png')}
+									/>
+								)}
+							</View>
 						</TouchableOpacity>
 					)}
 				/>
@@ -150,8 +207,8 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 	},
 	identifyView: {
-		borderTopLeftRadius: 10,
-		borderTopRightRadius: 10,
+		borderTopLeftRadius: 20,
+		borderTopRightRadius: 20,
 		backgroundColor: Colors.white,
 		width: '100%',
 		position: 'absolute',

@@ -19,9 +19,7 @@ interface Props {
 }
 /* TODO:
 - Ikke al teksten "Introduktion"/"Quick Tutorial" bliver vist
-- Ovenstående gælder også for "Tag et billede af din kabale" teksten
-- Alle anim's måtte gerne hæves lidt over knappen og tættere på overskrift/titel
-- Tilføj start-oversigt over de 3 trin ala Figma
+- Ikke al teksten "Tag et billede af din kabale" bliver vist
 */
 
 export default class Tutorial extends React.Component<Props> {
@@ -29,7 +27,14 @@ export default class Tutorial extends React.Component<Props> {
 		firstCardAnim: new Animated.Value(0),
 		secondCardAnim: new Animated.Value(0),
 		thirdCardAnim: new Animated.Value(0),
-		animationState: 0,
+		animationState: 1,
+	};
+
+	componentDidMount = () => {
+		Animated.timing(this.state.firstCardAnim, {
+			toValue: 1,
+			duration: 300,
+		}).start();
 	};
 
 	render = () => {
@@ -77,6 +82,7 @@ export default class Tutorial extends React.Component<Props> {
 					flex={1}
 					minHeight={Dimensions.get('screen').height * 0.7}
 				/>
+				<Spacer flex={0} minHeight={30} />
 				<RedButton
 					style={{ marginTop: 20 }}
 					title="Næste"

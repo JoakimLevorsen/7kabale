@@ -23,7 +23,7 @@ const RootStack = createStackNavigator<AppStackParamList>();
 export default () => (
 	<NavigationContainer>
 		<RootStack.Navigator
-			initialRouteName="Main"
+			initialRouteName="Tutorial"
 			screenOptions={{ headerShown: false }}
 		>
 			<RootStack.Screen name="Tutorial" component={Tutorial} />
