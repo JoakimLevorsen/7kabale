@@ -5,11 +5,14 @@ import {
 	Image,
 	TouchableOpacity,
 	Text,
+	Dimensions,
 	ActivityIndicator,
 } from 'react-native';
 import { Camera } from 'expo-camera';
 import { useNavigation } from '@react-navigation/native';
 import { NavStack } from '../AppNavigator';
+import * as SecureStore from 'expo-secure-store';
+import Tutorial from './Tutorial';
 
 /* TODO:
 - Lav en simpel loading anim der popper op onpress før navigation (der går lige et sekund inden skærmskifte)
@@ -22,6 +25,11 @@ export default () => {
 
 	useEffect(() => {
 		(async () => {
+			await SecureStore.getItemAsync('hasBeenShown').then(info => {
+				if (info !== 'true') {
+					navigation.navigate('Tutorial');
+				}
+			});
 			const { status } = await Camera.requestPermissionsAsync();
 			setHasPermission(status === 'granted');
 		})();

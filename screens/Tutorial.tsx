@@ -8,6 +8,7 @@ import Spacer from '../components/Spacer';
 import { Animated, Dimensions } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { AppStackParamList } from '../AppNavigator';
+import * as SecureStore from 'expo-secure-store';
 
 export type TutorialNavigationProp = StackNavigationProp<
 	AppStackParamList,
@@ -31,6 +32,10 @@ export default class Tutorial extends React.Component<Props> {
 	};
 
 	componentDidMount = () => {
+		SecureStore.setItemAsync('hasBeenShown', 'true')
+			.then(() => console.log('Tutorial has been shown'))
+			.catch(e => console.log('Tutorial state save error:', e));
+
 		Animated.timing(this.state.firstCardAnim, {
 			toValue: 1,
 			duration: 300,

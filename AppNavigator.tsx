@@ -26,7 +26,7 @@ export type NavStack = StackNavigationProp<AppStackParamList>;
 export default () => (
 	<NavigationContainer>
 		<RootStack.Navigator
-			initialRouteName="Tutorial"
+			initialRouteName="Main"
 			screenOptions={{ headerShown: false }}
 		>
 			<RootStack.Screen name="Tutorial" component={Tutorial} />
