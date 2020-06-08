@@ -5,11 +5,11 @@ import {
 	Image,
 	TouchableOpacity,
 	Text,
-	Dimensions,
 	ActivityIndicator,
 } from 'react-native';
 import { Camera } from 'expo-camera';
 import { useNavigation } from '@react-navigation/native';
+import { NavStack } from '../AppNavigator';
 
 /* TODO:
 - Lav en simpel loading anim der popper op onpress før navigation (der går lige et sekund inden skærmskifte)
@@ -18,7 +18,7 @@ import { useNavigation } from '@react-navigation/native';
 let camera: Camera | null = null;
 export default () => {
 	const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-	const navigation = useNavigation();
+	const navigation = useNavigation<NavStack>();
 
 	useEffect(() => {
 		(async () => {
@@ -56,7 +56,7 @@ export default () => {
 				<View style={[styles.container, styles.buttonView]}>
 					<TouchableOpacity
 						onPress={async () => {
-							let photo = await camera?.takePictureAsync();
+							let photo = await camera?.takePictureAsync()!;
 							navigation.navigate('ChoozPic', { photo });
 						}}
 					>

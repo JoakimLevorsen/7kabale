@@ -1,5 +1,8 @@
 import React from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
+import {
+	createStackNavigator,
+	StackNavigationProp,
+} from '@react-navigation/stack';
 import Main from './screens/Main';
 import Tutorial from './screens/Tutorial';
 import ChoozPic from './screens/ChoozPic';
@@ -17,6 +20,8 @@ export type AppStackParamList = {
 };
 
 const RootStack = createStackNavigator<AppStackParamList>();
+
+export type NavStack = StackNavigationProp<AppStackParamList>;
 
 export default () => (
 	<NavigationContainer>

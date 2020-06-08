@@ -9,7 +9,7 @@ import {
 	Image,
 } from 'react-native';
 import { RouteProp, useNavigation } from '@react-navigation/native';
-import { AppStackParamList } from '../AppNavigator';
+import { AppStackParamList, NavStack } from '../AppNavigator';
 import { Colors, FontSize } from '../constants';
 import CustomText from '../components/CustomText';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -45,8 +45,6 @@ const suitIcons = [
 	require('../assets/diamondsWhite.png'),
 	require('../assets/spadesWhite.png'),
 ];
-
-type NavStack = StackNavigationProp<AppStackParamList>;
 
 export default ({ route }: Props) => {
 	const photo = route.params.photo;
