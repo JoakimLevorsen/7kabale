@@ -7,12 +7,15 @@ import {
 	Text,
 	Dimensions,
 	ActivityIndicator,
+	Button,
 } from 'react-native';
 import { Camera } from 'expo-camera';
 import { useNavigation } from '@react-navigation/native';
 import { NavStack } from '../AppNavigator';
 import * as SecureStore from 'expo-secure-store';
 import Tutorial from './Tutorial';
+import RedButton from '../components/RedButton';
+import Colors from '../constants/Colors';
 
 /* TODO:
 - Lav en simpel loading anim der popper op onpress før navigation (der går lige et sekund inden skærmskifte)
@@ -62,6 +65,11 @@ export default () => {
 				}}
 			>
 				<View style={[styles.container, styles.buttonView]}>
+					<RedButton
+						style={styles.greenButton}
+						title={'Tutorial'}
+						onPress={() => navigation.navigate('Tutorial')}
+					></RedButton>
 					<TouchableOpacity
 						onPress={async () => {
 							let photo = await camera?.takePictureAsync()!;
@@ -88,11 +96,17 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	buttonView: {
-		justifyContent: 'flex-end',
+		justifyContent: 'space-between',
 	},
 	cameraImage: {
 		width: 100,
 		height: 100,
 		marginBottom: 20,
+	},
+	greenButton: {
+		marginTop: 30,
+		backgroundColor: Colors.green,
+		width: 125,
+		height: 25,
 	},
 });
