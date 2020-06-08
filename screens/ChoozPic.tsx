@@ -1,11 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { CameraCapturedPicture } from 'expo-camera';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { View, StyleSheet, Image } from 'react-native';
+import { useNavigation, RouteProp } from '@react-navigation/native';
 import { Colors } from '../constants';
 import CustomText from '../components/CustomText';
 import RedButton from '../components/RedButton';
-import Spacer from '../components/Spacer';
 import { AppStackParamList } from '../AppNavigator';
 
 /* TODO:
@@ -30,6 +28,7 @@ export default ({ route }: Props) => {
 				<RedButton
 					style={styles.smallerButtons}
 					title="NEJ"
+					padding={10}
 					onPress={() => {
 						navigation.navigate('Main');
 					}}

@@ -13,38 +13,17 @@ import { AppStackParamList, NavStack } from '../AppNavigator';
 import { Colors, FontSize } from '../constants';
 import CustomText from '../components/CustomText';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { StackNavigationProp } from '@react-navigation/stack';
+import {
+	CardType,
+	Suit,
+	allSuits,
+	allCardTypes,
+	suitIcons,
+} from '../types/Card';
 
 interface Props {
 	route: RouteProp<AppStackParamList, 'Loading'>;
 }
-
-const allSuits = ['Heart', 'Club', 'Diamond', 'Spade'] as const;
-type Suit = typeof allSuits[number];
-
-const allCardTypes = [
-	'Ace',
-	'2',
-	'3',
-	'4',
-	'5',
-	'6',
-	'7',
-	'8',
-	'9',
-	'10',
-	'Jack',
-	'Queen',
-	'King',
-] as const;
-type CardType = typeof allCardTypes[number];
-
-const suitIcons = [
-	require('../assets/heartWhite.png'),
-	require('../assets/clubsWhite.png'),
-	require('../assets/diamondsWhite.png'),
-	require('../assets/spadesWhite.png'),
-];
 
 export default ({ route }: Props) => {
 	const photo = route.params.photo;
