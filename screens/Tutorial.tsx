@@ -2,7 +2,7 @@ import React from 'react';
 import RedButton from '../components/RedButton';
 import { SafeAreaView } from 'react-navigation';
 import { Colors, FontSize } from '../constants';
-import CardView from '../components/CardView';
+import CardView from '../components/TutorialCardView';
 import CustomText from '../components/CustomText';
 import Spacer from '../components/Spacer';
 import { Animated, Dimensions } from 'react-native';
