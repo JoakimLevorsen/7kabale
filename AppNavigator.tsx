@@ -1,9 +1,5 @@
 import React from 'react';
-import { createSwitchNavigator, createAppContainer } from 'react-navigation';
-import {
-	StackNavigationProp,
-	createStackNavigator,
-} from '@react-navigation/stack';
+import { createStackNavigator } from '@react-navigation/stack';
 import Main from './screens/Main';
 import Tutorial from './screens/Tutorial';
 import ChoozPic from './screens/ChoozPic';
