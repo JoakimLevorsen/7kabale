@@ -66,6 +66,7 @@ export default () => {
 			>
 				<View style={[styles.container, styles.buttonView]}>
 					<RedButton
+						// padding={10}
 						style={styles.greenButton}
 						title={'Tutorial'}
 						onPress={() => navigation.navigate('Tutorial')}
@@ -104,9 +105,9 @@ const styles = StyleSheet.create({
 		marginBottom: 20,
 	},
 	greenButton: {
-		marginTop: 30,
+		marginTop: 40,
 		backgroundColor: Colors.green,
 		width: 125,
-		height: 25,
+		// height: 25,
 	},
 });
