@@ -6,6 +6,7 @@ import {
 	TouchableOpacity,
 	Text,
 	Dimensions,
+	ActivityIndicator,
 } from 'react-native';
 import { Camera } from 'expo-camera';
 import { useNavigation } from '@react-navigation/native';
@@ -27,7 +28,17 @@ export default () => {
 	}, []);
 
 	if (hasPermission === null) {
-		return <View />;
+		return (
+			<View
+				style={{
+					flex: 1,
+					justifyContent: 'center',
+					alignItems: 'center',
+				}}
+			>
+				<ActivityIndicator size="large" />
+			</View>
+		);
 	}
 	if (hasPermission === false) {
 		return <Text>No access to camera!</Text>;
