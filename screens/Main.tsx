@@ -28,11 +28,13 @@ export default () => {
 
 	useEffect(() => {
 		(async () => {
-			await SecureStore.getItemAsync('hasBeenShown').then(info => {
-				if (info !== 'true') {
-					navigation.navigate('Tutorial');
-				}
-			});
+			SecureStore.getItemAsync('hasBeenShown')
+				.then(info => {
+					if (info !== 'true') {
+						navigation.navigate('Tutorial');
+					}
+				})
+				.catch(e => console.log('Main (Tutorial state) error', e));
 			const { status } = await Camera.requestPermissionsAsync();
 			setHasPermission(status === 'granted');
 		})();
