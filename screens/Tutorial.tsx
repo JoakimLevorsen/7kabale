@@ -32,9 +32,9 @@ export default class Tutorial extends React.Component<Props> {
 	};
 
 	componentDidMount = () => {
-		SecureStore.setItemAsync('hasBeenShown', 'true')
-			.then(() => console.log('Tutorial has been shown'))
-			.catch(e => console.log('Tutorial state save error:', e));
+		SecureStore.setItemAsync('hasBeenShown', 'true').catch(e =>
+			console.log('Tutorial state save error:', e)
+		);
 
 		Animated.timing(this.state.firstCardAnim, {
 			toValue: 1,

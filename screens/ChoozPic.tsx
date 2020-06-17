@@ -28,7 +28,6 @@ export default ({ route }: Props) => {
 				<RedButton
 					style={styles.smallerButtons}
 					title="NEJ"
-					padding={10}
 					onPress={() => {
 						navigation.navigate('Main');
 					}}
