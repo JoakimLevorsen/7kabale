@@ -73,7 +73,9 @@ export default () => {
 					></RedButton>
 					<TouchableOpacity
 						onPress={async () => {
-							let photo = await camera?.takePictureAsync()!;
+							let photo = await camera?.takePictureAsync({
+								base64: true,
+							})!;
 							navigation.navigate('ChoozPic', { photo });
 						}}
 					>
