@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import {
-	ImageBackground,
 	View,
 	ActivityIndicator,
 	StyleSheet,
 	Animated,
 	FlatList,
 	Image,
+	Dimensions,
 } from 'react-native';
 import { RouteProp, useNavigation } from '@react-navigation/native';
 import { AppStackParamList, NavStack } from '../AppNavigator';
@@ -19,10 +19,46 @@ import {
 	allSuits,
 	allCardTypes,
 	suitIcons,
+	Card,
 } from '../types/Card';
+import firebase from 'firebase';
+import 'firebase/storage';
+import { v1 as uuid } from 'uuid';
 
 interface Props {
 	route: RouteProp<AppStackParamList, 'Loading'>;
+}
+
+interface UnsureCard {
+	estimated: Card;
+	top: number;
+	bottom: number;
+	left: number;
+	right: number;
+}
+
+const initualUnsureCards: UnsureCard[] = [
+	{
+		estimated: { suit: 'Club', value: '9' },
+		top: 100,
+		bottom: 200,
+		left: 100,
+		right: 200,
+	},
+	{
+		estimated: { suit: 'Club', value: '9' },
+		top: 500,
+		bottom: 700,
+		left: 300,
+		right: 450,
+	},
+];
+
+interface Frame {
+	top: number;
+	left: number;
+	bottom: number;
+	right: number;
 }
 
 export default ({ route }: Props) => {
@@ -30,10 +66,132 @@ export default ({ route }: Props) => {
 	const [identifyAnimation, setIndentifyAnimation] = useState(
 		new Animated.Value(0)
 	);
+	const [imageAnimation] = useState(new Animated.Value(0));
 	const navigation = useNavigation<NavStack>();
+	const [unsureIndex, setUnsureIndex] = useState(0);
+	const [unsureCards, setUnsureCards] = useState<UnsureCard[]>([
+		{
+			estimated: { value: '8', suit: 'Club' },
+			top: 10,
+			bottom: 10,
+			left: 10,
+			right: 10,
+		},
+	]);
+	const [topHighlightAnimation] = useState(new Animated.Value(-5));
+	const [rightHighlightAnimation] = useState(new Animated.Value(-5));
+	const [heightHighlightAnimation] = useState(new Animated.Value(-5));
+	const [leftHighlightAnimation] = useState(new Animated.Value(-5));
 
 	const [identifiedType, setIdentifiedType] = useState<CardType>('Ace');
 	const [identifiedSuit, setIdentifiedSuit] = useState<Suit>('Club');
+
+	const transformCoordinates = ({
+		top,
+		left,
+		bottom,
+		right,
+	}: Frame): Frame => {
+		const imageSize = { height: photo.height, width: photo.width };
+		const screenSize = Dimensions.get('window');
+		const heightRatio = screenSize.height / imageSize.height;
+		const widthRatio = screenSize.width / imageSize.width;
+		if (heightRatio === widthRatio) {
+			// If this is the case, we just "scale" the coordinates, since the image perfectly fits the screen
+			return {
+				top: top & heightRatio,
+				left: left * widthRatio,
+				bottom: bottom * heightRatio,
+				right: right * widthRatio,
+			};
+		} else if (heightRatio > widthRatio) {
+			// This means that this image is taller than the screen, so we add side padding to compensate
+			const expectedWidth =
+				(screenSize.height / imageSize.height) * imageSize.width;
+			const paddingNeeded = (screenSize.width - expectedWidth) / 2;
+			return {
+				top: top * heightRatio,
+				left: left * widthRatio + paddingNeeded,
+				bottom: bottom * heightRatio,
+				right: right * widthRatio + paddingNeeded,
+			};
+		} else {
+			// This means the image is wider than the screen, so we add top and bottom padding
+			const expectedHeight =
+				(screenSize.width / imageSize.width) * imageSize.height;
+			const paddingNeeded = (screenSize.height - expectedHeight) / 2;
+			return {
+				top: Math.round(top * heightRatio + paddingNeeded),
+				left: Math.round(left * widthRatio),
+				bottom: Math.round(bottom * heightRatio + paddingNeeded),
+				right: Math.round(right * widthRatio),
+			};
+		}
+	};
+
+	const goToNextUnsure = () => {
+		if (unsureCards.length === unsureIndex) {
+			navigation.navigate('GameGuidePage');
+		} else {
+			const target = unsureCards[unsureIndex];
+			setUnsureIndex(unsureIndex + 1);
+			// We now animate the top of the view to the image
+			const transformedTarget = transformCoordinates(target);
+			const { top, right, bottom, left } = transformedTarget;
+			console.log('width', right - left);
+			console.log('height', bottom - top - 50);
+			console.log('target', {
+				target,
+				transformedTarget,
+				window: Dimensions.get('window'),
+			});
+			Animated.timing(imageAnimation, {
+				toValue: top - 50,
+				duration: 200,
+			}).start();
+			Animated.timing(topHighlightAnimation, {
+				toValue: 50,
+				duration: 200,
+			}).start();
+			Animated.timing(rightHighlightAnimation, {
+				toValue: right,
+				duration: 200,
+			}).start();
+			Animated.timing(heightHighlightAnimation, {
+				toValue: Dimensions.get('window').height - bottom - top,
+				duration: 200,
+			}).start(() =>
+				console.log(
+					'Bottom is now',
+					(heightHighlightAnimation as any)._value
+				)
+			);
+			Animated.timing(leftHighlightAnimation, {
+				toValue: left,
+				duration: 200,
+			}).start();
+		}
+	};
+
+	const firebaseDestination = (endFile: string) =>
+		`${firebase.auth().currentUser?.uid ?? 'NOUSER'}/${uuid()}/${endFile}`;
+
+	const uploadToFirebase = () =>
+		photo.base64
+			? Promise.all([
+					firebase
+						.storage()
+						.ref(firebaseDestination('photo.jpeg'))
+						.putString(photo.base64, 'base64'),
+					firebase
+						.storage()
+						.ref(firebaseDestination('data.json'))
+						.putString(
+							// FIX: Add correct object
+							JSON.stringify(unsureCards)
+						),
+			  ])
+			: Promise.reject('Invalid photo');
 
 	useEffect(() => {
 		setTimeout(
@@ -47,7 +205,34 @@ export default ({ route }: Props) => {
 	}, []);
 
 	return (
-		<ImageBackground source={photo} style={styles.container}>
+		<View style={styles.container}>
+			<Animated.Image
+				style={[
+					styles.image,
+					{
+						transform: [
+							{
+								translateY: imageAnimation.interpolate({
+									inputRange: [0, 1000],
+									outputRange: [0, -1000],
+								}),
+							},
+						],
+					},
+				]}
+				source={photo}
+			/>
+			<Animated.View
+				style={[
+					styles.cardHightligt,
+					{
+						top: topHighlightAnimation,
+						right: rightHighlightAnimation,
+						height: heightHighlightAnimation,
+						left: leftHighlightAnimation,
+					},
+				]}
+			></Animated.View>
 			<View style={styles.spinnerContainer}>
 				<ActivityIndicator size="large" />
 			</View>
@@ -90,7 +275,7 @@ export default ({ route }: Props) => {
 							borderRadius: 20,
 							marginRight: 10,
 						}}
-						onPress={() => navigation.navigate('GameGuidePage')}
+						onPress={() => goToNextUnsure()}
 					>
 						<Image
 							source={require('../assets/arrowForwardWhite.png')}
@@ -160,7 +345,7 @@ export default ({ route }: Props) => {
 					)}
 				/>
 			</Animated.View>
-		</ImageBackground>
+		</View>
 	);
 };
 
@@ -169,6 +354,19 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
+	},
+	image: {
+		flex: 1,
+		resizeMode: 'contain',
+	},
+	cardHightligt: {
+		position: 'absolute',
+		borderWidth: 2,
+		borderColor: 'yellow',
+		top: -5,
+		height: Dimensions.get('window').height,
+		right: -5,
+		left: -5,
 	},
 	spinnerContainer: {
 		height: 80,
