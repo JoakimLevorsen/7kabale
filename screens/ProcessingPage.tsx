@@ -24,6 +24,7 @@ import {
 import firebase from 'firebase';
 import 'firebase/storage';
 import { v1 as uuid } from 'uuid';
+import { Frame } from '../types/Frame';
 
 interface Props {
 	route: RouteProp<AppStackParamList, 'Loading'>;
@@ -39,27 +40,20 @@ interface UnsureCard {
 
 const initualUnsureCards: UnsureCard[] = [
 	{
-		estimated: { suit: 'Club', value: '9' },
+		estimated: { suit: 'Club', value: 9 },
 		top: 100,
 		bottom: 200,
 		left: 100,
 		right: 200,
 	},
 	{
-		estimated: { suit: 'Club', value: '9' },
+		estimated: { suit: 'Club', value: 9 },
 		top: 500,
 		bottom: 700,
 		left: 300,
 		right: 450,
 	},
 ];
-
-interface Frame {
-	top: number;
-	left: number;
-	bottom: number;
-	right: number;
-}
 
 export default ({ route }: Props) => {
 	const photo = route.params.photo;
@@ -71,7 +65,7 @@ export default ({ route }: Props) => {
 	const [unsureIndex, setUnsureIndex] = useState(0);
 	const [unsureCards, setUnsureCards] = useState<UnsureCard[]>([
 		{
-			estimated: { value: '8', suit: 'Club' },
+			estimated: { value: 8, suit: 'Club' },
 			top: 10,
 			bottom: 10,
 			left: 10,
@@ -316,7 +310,7 @@ export default ({ route }: Props) => {
 				<FlatList
 					style={{ marginHorizontal: 10 }}
 					data={allCardTypes}
-					keyExtractor={v => v}
+					keyExtractor={v => v.toString()}
 					renderItem={({ item }) => (
 						<TouchableOpacity
 							key={item}
