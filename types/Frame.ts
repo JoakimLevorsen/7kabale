@@ -1,6 +1,6 @@
 export interface Frame {
-	top: number;
-	left: number;
-	bottom: number;
-	right: number;
+	x: number;
+	y: number;
+	height: number;
+	width: number;
 }

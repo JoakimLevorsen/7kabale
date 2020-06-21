@@ -25,6 +25,7 @@ import firebase from 'firebase';
 import 'firebase/storage';
 import { v1 as uuid } from 'uuid';
 import { Frame } from '../types/Frame';
+import SelectionItem from '../components/SelectionItem';
 
 interface Props {
 	route: RouteProp<AppStackParamList, 'Loading'>;
@@ -32,60 +33,34 @@ interface Props {
 
 interface UnsureCard {
 	estimated: Card;
-	top: number;
-	bottom: number;
-	left: number;
-	right: number;
+	x: number;
+	y: number;
+	height: number;
+	width: number;
 }
 
 const initualUnsureCards: UnsureCard[] = [
 	{
 		estimated: { suit: 'Club', value: 9 },
-		top: 100,
-		bottom: 200,
-		left: 100,
-		right: 200,
+		x: 100,
+		y: 500,
+		height: 300,
+		width: 600,
 	},
 	{
 		estimated: { suit: 'Club', value: 9 },
-		top: 500,
-		bottom: 700,
-		left: 300,
-		right: 450,
+		x: 800,
+		y: 800,
+		height: 300,
+		width: 200,
 	},
 ];
 
 export default ({ route }: Props) => {
 	const photo = route.params.photo;
-	const [identifyAnimation, setIndentifyAnimation] = useState(
-		new Animated.Value(0)
-	);
-	const [imageAnimation] = useState(new Animated.Value(0));
-	const navigation = useNavigation<NavStack>();
-	const [unsureIndex, setUnsureIndex] = useState(0);
-	const [unsureCards, setUnsureCards] = useState<UnsureCard[]>([
-		{
-			estimated: { value: 8, suit: 'Club' },
-			top: 10,
-			bottom: 10,
-			left: 10,
-			right: 10,
-		},
-	]);
-	const [topHighlightAnimation] = useState(new Animated.Value(-5));
-	const [rightHighlightAnimation] = useState(new Animated.Value(-5));
-	const [heightHighlightAnimation] = useState(new Animated.Value(-5));
-	const [leftHighlightAnimation] = useState(new Animated.Value(-5));
 
-	const [identifiedType, setIdentifiedType] = useState<CardType>('Ace');
-	const [identifiedSuit, setIdentifiedSuit] = useState<Suit>('Club');
-
-	const transformCoordinates = ({
-		top,
-		left,
-		bottom,
-		right,
-	}: Frame): Frame => {
+	// Transform image space, to screen space
+	const transformCoordinates = ({ x, y, height, width }: Frame): Frame => {
 		const imageSize = { height: photo.height, width: photo.width };
 		const screenSize = Dimensions.get('window');
 		const heightRatio = screenSize.height / imageSize.height;
@@ -93,10 +68,10 @@ export default ({ route }: Props) => {
 		if (heightRatio === widthRatio) {
 			// If this is the case, we just "scale" the coordinates, since the image perfectly fits the screen
 			return {
-				top: top & heightRatio,
-				left: left * widthRatio,
-				bottom: bottom * heightRatio,
-				right: right * widthRatio,
+				x: x * heightRatio,
+				y: y * widthRatio,
+				height: height * heightRatio,
+				width: width * widthRatio,
 			};
 		} else if (heightRatio > widthRatio) {
 			// This means that this image is taller than the screen, so we add side padding to compensate
@@ -104,10 +79,10 @@ export default ({ route }: Props) => {
 				(screenSize.height / imageSize.height) * imageSize.width;
 			const paddingNeeded = (screenSize.width - expectedWidth) / 2;
 			return {
-				top: top * heightRatio,
-				left: left * widthRatio + paddingNeeded,
-				bottom: bottom * heightRatio,
-				right: right * widthRatio + paddingNeeded,
+				x: x * heightRatio,
+				y: y * widthRatio + paddingNeeded,
+				height: height * heightRatio,
+				width: width * widthRatio + paddingNeeded,
 			};
 		} else {
 			// This means the image is wider than the screen, so we add top and bottom padding
@@ -115,55 +90,34 @@ export default ({ route }: Props) => {
 				(screenSize.width / imageSize.width) * imageSize.height;
 			const paddingNeeded = (screenSize.height - expectedHeight) / 2;
 			return {
-				top: Math.round(top * heightRatio + paddingNeeded),
-				left: Math.round(left * widthRatio),
-				bottom: Math.round(bottom * heightRatio + paddingNeeded),
-				right: Math.round(right * widthRatio),
+				x: Math.round(x * heightRatio + paddingNeeded),
+				y: Math.round(y * widthRatio),
+				height: Math.round(height * heightRatio + paddingNeeded),
+				width: Math.round(width * widthRatio),
 			};
 		}
 	};
 
+	const [identifyAnimation] = useState(new Animated.Value(0));
+	const [imageAnimation] = useState(new Animated.Value(0));
+	const navigation = useNavigation<NavStack>();
+	const [unsureIndex, setUnsureIndex] = useState(0);
+	const [unsureCards, setUnsureCards] = useState<UnsureCard[]>(
+		initualUnsureCards.map(({ x, y, height, width, ...other }) => ({
+			...transformCoordinates({ x, y, height, width }),
+			...other,
+		}))
+	);
+	const currentCard = unsureCards[unsureIndex].estimated;
+	const [editMode, setEditMode] = useState(false);
+
 	const goToNextUnsure = () => {
-		if (unsureCards.length === unsureIndex) {
+		if (unsureCards.length === unsureIndex + 1) {
 			navigation.navigate('GameGuidePage');
 		} else {
 			const target = unsureCards[unsureIndex];
 			setUnsureIndex(unsureIndex + 1);
 			// We now animate the top of the view to the image
-			const transformedTarget = transformCoordinates(target);
-			const { top, right, bottom, left } = transformedTarget;
-			console.log('width', right - left);
-			console.log('height', bottom - top - 50);
-			console.log('target', {
-				target,
-				transformedTarget,
-				window: Dimensions.get('window'),
-			});
-			Animated.timing(imageAnimation, {
-				toValue: top - 50,
-				duration: 200,
-			}).start();
-			Animated.timing(topHighlightAnimation, {
-				toValue: 50,
-				duration: 200,
-			}).start();
-			Animated.timing(rightHighlightAnimation, {
-				toValue: right,
-				duration: 200,
-			}).start();
-			Animated.timing(heightHighlightAnimation, {
-				toValue: Dimensions.get('window').height - bottom - top,
-				duration: 200,
-			}).start(() =>
-				console.log(
-					'Bottom is now',
-					(heightHighlightAnimation as any)._value
-				)
-			);
-			Animated.timing(leftHighlightAnimation, {
-				toValue: left,
-				duration: 200,
-			}).start();
 		}
 	};
 
@@ -186,6 +140,15 @@ export default ({ route }: Props) => {
 						),
 			  ])
 			: Promise.reject('Invalid photo');
+
+	const updateCurrentCard = (item: Partial<UnsureCard>) => {
+		const newUnsure = [...unsureCards];
+		newUnsure[unsureIndex] = {
+			...newUnsure[unsureIndex],
+			...item,
+		};
+		setUnsureCards(newUnsure);
+	};
 
 	useEffect(() => {
 		setTimeout(
@@ -216,20 +179,20 @@ export default ({ route }: Props) => {
 				]}
 				source={photo}
 			/>
-			<Animated.View
-				style={[
-					styles.cardHightligt,
-					{
-						top: topHighlightAnimation,
-						right: rightHighlightAnimation,
-						height: heightHighlightAnimation,
-						left: leftHighlightAnimation,
-					},
-				]}
-			></Animated.View>
-			<View style={styles.spinnerContainer}>
+			{/* <View style={styles.spinnerContainer}>
 				<ActivityIndicator size="large" />
-			</View>
+			</View> */}
+			{unsureCards.map((uC, i) => (
+				<SelectionItem
+					key={i}
+					position={uC}
+					editable={editMode && unsureIndex === i}
+					active={unsureIndex === i}
+					card={uC.estimated.value}
+					suit={uC.estimated.suit}
+					setPosition={position => updateCurrentCard(position)}
+				/>
+			))}
 			<Animated.View
 				style={[
 					styles.identifyView,
@@ -257,8 +220,59 @@ export default ({ route }: Props) => {
 						fontSize={FontSize.header}
 						textAlign="left"
 					>
-						Er dette {identifiedSuit} {identifiedType}?
+						Er dette {currentCard.suit} {currentCard.value}?
 					</CustomText>
+					<TouchableOpacity
+						style={{
+							height: 40,
+							width: 40,
+							justifyContent: 'center',
+							alignItems: 'center',
+							backgroundColor: Colors.black,
+							borderRadius: 20,
+							marginRight: 10,
+						}}
+						onPress={() =>
+							setUnsureCards([
+								...unsureCards,
+								{
+									x: 100,
+									y: 100,
+									height: 200,
+									width: 200,
+									estimated: {
+										suit: 'Diamond',
+										value: 'Ace',
+									},
+								},
+							])
+						}
+					>
+						<CustomText flex={0} color={Colors.white}>
+							Add
+						</CustomText>
+					</TouchableOpacity>
+					<TouchableOpacity
+						style={{
+							height: 40,
+							width: 40,
+							justifyContent: 'center',
+							alignItems: 'center',
+							backgroundColor: Colors.black,
+							borderRadius: 20,
+							marginRight: 10,
+						}}
+						onPress={() => {
+							Animated.timing(identifyAnimation, {
+								toValue: editMode ? 1 : 0.5,
+							}).start();
+							setEditMode(!editMode);
+						}}
+					>
+						<CustomText flex={0} color={Colors.white}>
+							Edit
+						</CustomText>
+					</TouchableOpacity>
 					<TouchableOpacity
 						style={{
 							height: 40,
@@ -271,9 +285,15 @@ export default ({ route }: Props) => {
 						}}
 						onPress={() => goToNextUnsure()}
 					>
-						<Image
-							source={require('../assets/arrowForwardWhite.png')}
-						/>
+						{unsureIndex === unsureCards.length - 1 ? (
+							<Image
+								source={require('../assets/checkWhite.png')}
+							/>
+						) : (
+							<Image
+								source={require('../assets/arrowForwardWhite.png')}
+							/>
+						)}
 					</TouchableOpacity>
 				</View>
 				<View
@@ -292,13 +312,20 @@ export default ({ route }: Props) => {
 								justifyContent: 'center',
 								alignItems: 'center',
 								backgroundColor:
-									suit === identifiedSuit
+									suit === currentCard.suit
 										? Colors.green
 										: Colors.black,
 								borderRadius: 35,
 								marginRight: 10,
 							}}
-							onPress={() => setIdentifiedSuit(suit)}
+							onPress={() =>
+								updateCurrentCard({
+									estimated: {
+										suit,
+										value: currentCard.value,
+									},
+								})
+							}
 						>
 							<Image
 								style={{ height: 50, width: 50 }}
@@ -314,7 +341,14 @@ export default ({ route }: Props) => {
 					renderItem={({ item }) => (
 						<TouchableOpacity
 							key={item}
-							onPress={() => setIdentifiedType(item)}
+							onPress={() =>
+								updateCurrentCard({
+									estimated: {
+										suit: currentCard.suit,
+										value: item,
+									},
+								})
+							}
 							style={{ padding: 10, flexDirection: 'row' }}
 						>
 							<CustomText textAlign="left">{item}</CustomText>
@@ -324,12 +358,12 @@ export default ({ route }: Props) => {
 									width: 40,
 									borderRadius: 20,
 									backgroundColor:
-										item === identifiedType
+										item === currentCard.value
 											? Colors.green
 											: Colors.black,
 								}}
 							>
-								{item === identifiedType && (
+								{item === currentCard.value && (
 									<Image
 										source={require('../assets/checkWhite.png')}
 									/>
