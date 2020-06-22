@@ -1,8 +1,20 @@
-import { CardType, Suit, allCardTypes, allSuits } from '../types/Card';
+import {
+	CardType,
+	Suit,
+	allCardTypes,
+	allSuits,
+	Card as AppCard,
+} from '../types/Card';
+import { CardGuess, fakeGuess } from '../types/Guess';
 
-const isValueNextOnResult = (compare: CardType | null, to: CardType) => {
+const isValueNextOnResult = (
+	compare: CardType | null | undefined,
+	to: CardType | undefined
+) => {
 	if (!compare) return true;
 	switch (compare) {
+		case undefined:
+			return to === 'Ace';
 		case 'Ace':
 			return to === 2;
 		case 2:
@@ -31,7 +43,10 @@ const isValueNextOnResult = (compare: CardType | null, to: CardType) => {
 	return false;
 };
 
-const isValueNextOnPlay = (compare: CardType | null, to: CardType) => {
+const isValueNextOnPlay = (
+	compare: CardType | null | undefined,
+	to: CardType | undefined
+) => {
 	if (!compare) return true;
 	switch (compare) {
 		case 'King':
@@ -62,7 +77,8 @@ const isValueNextOnPlay = (compare: CardType | null, to: CardType) => {
 	return false;
 };
 
-const isSuitOpposite = (compare: Suit, to: Suit) => {
+const isSuitOpposite = (compare: Suit | undefined, to: Suit | undefined) => {
+	if (!compare || !to) return false;
 	switch (compare) {
 		case 'Diamond':
 		case 'Heart':
@@ -74,10 +90,36 @@ const isSuitOpposite = (compare: Suit, to: Suit) => {
 };
 
 export class Card {
-	public visible: boolean;
+	private visibleOverride?: boolean;
+	constructor(private base: CardGuess) {}
 
-	constructor(public suit: Suit, public value: CardType) {
-		this.visible = false;
+	public get value() {
+		return this.base.values[0].back
+			? undefined
+			: this.base.values[0].card.value;
+	}
+
+	public get suit() {
+		return this.base.values[0].back
+			? undefined
+			: this.base.values[0].card.suit;
+	}
+
+	public get visible() {
+		if (typeof this.visibleOverride !== undefined)
+			return this.visibleOverride!;
+		return this.value === undefined;
+	}
+
+	public set visible(value: boolean) {
+		this.visibleOverride = value;
+	}
+
+	public get appCard(): AppCard {
+		return {
+			suit: this.suit!,
+			value: this.value!,
+		};
 	}
 
 	public toString(): string {
@@ -128,6 +170,14 @@ export abstract class Pile {
 		return this.cards.length === 1;
 	}
 
+	public get size() {
+		return this.cards.length;
+	}
+
+	public get content() {
+		return [...this.cards];
+	}
+
 	public toString = () =>
 		this.cards.length === 0
 			? 'Empty'
@@ -137,7 +187,8 @@ export abstract class Pile {
 export class FoundationPile extends Pile {
 	public canAdd = (card: Card) =>
 		(this.top === null && card.value === 'Ace') ||
-		(card.suit === this.top?.suit &&
+		((card.suit === this.top?.suit) !== undefined &&
+			this.top?.value !== undefined &&
 			isValueNextOnResult(this.top?.value, card.value));
 
 	public isFull = (): boolean => this.cards.length === allCardTypes.length;
@@ -208,13 +259,9 @@ export interface Move {
 
 export class Game {
 	private _gameOver = false;
-	private _drawPile = new DrawPile();
-	private _foundationPiles = Array(4)
-		.fill(null)
-		.map(() => new FoundationPile());
-	private _playPiles = Array(7)
-		.fill(null)
-		.map(() => new PlayPile());
+	private _drawPile: DrawPile;
+	private _foundationPiles: FoundationPile[];
+	private _playPiles: PlayPile[];
 
 	constructor(
 		_drawPile?: DrawPile,
@@ -236,10 +283,11 @@ export class Game {
 			const allCards: Card[] = [];
 			for (const suit of allSuits) {
 				for (const value of allCardTypes) {
-					allCards.push(new Card(suit, value));
+					allCards.push(new Card(fakeGuess({ suit, value })));
 				}
 			}
 			const shuffld = shuffle(allCards);
+			console.log('playPiles is', typeof this._playPiles);
 			// Now we put da cardz in da play zone
 			for (const [index, pile] of this._playPiles.entries()) {
 				pile.fillPile(shuffld.splice(0, index + 1));
@@ -694,40 +742,3 @@ else if (!g.isGameWon()) console.log(`Dumbass, you lost.`);
  */
 
 // PLAY SEVERAL GAMES AUTOMATICALLY:
-let i = 0;
-let gamesWon = 0;
-let totalMovesFromGamesWon = 0;
-while (i < 10000) {
-	const g = new Game();
-	let numMoves = 0;
-	let drawShift = 0;
-	while (!g.gameOver) {
-		if (drawShift > 24) {
-			g.gameOver = true;
-		} else {
-			const move = g.suggestMove();
-			if (move !== null) {
-				g.doMove(move);
-				numMoves++;
-				if (move.from.pile === 'draw' && move.to.pile === 'draw') {
-					drawShift++;
-				} else drawShift = 0;
-			} else g.gameOver = true;
-			if (g.isGameWon()) {
-				g.gameOver = true;
-				gamesWon++;
-				totalMovesFromGamesWon += numMoves;
-			}
-		}
-	}
-	const winLoseString = g.isGameWon() ? 'won!' : 'lost.';
-	console.log(`Game #${i + 1} ${winLoseString} ${numMoves} moves made.`);
-	i++;
-}
-console.log(
-	`\n${gamesWon} games won out of ${i} played (${
-		(gamesWon / i) * 100
-	} %).\nAn average of ${Math.round(
-		totalMovesFromGamesWon / gamesWon
-	)} moves made in games won.\n`
-);

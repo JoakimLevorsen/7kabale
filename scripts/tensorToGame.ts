@@ -1,19 +1,5 @@
-import { Card } from '../types/Card';
-import { Game, DrawPile } from './suggestMove';
-
-interface Box {
-	top: number;
-	bottom: number;
-	left: number;
-	right: number;
-}
-
-interface CardGuess extends Box {
-	values: Array<
-		| { confidence: number; card: Card; back: false }
-		| { confidence: number; back: true }
-	>;
-}
+import { Game, DrawPile, Card as CardClass } from './suggestMove';
+import { CardGuess, Box } from '../types/Guess';
 
 export const tensorToGame = (input: CardGuess[]): Game => {
 	// We don't know how the cards are oriented, but we assume between -30 and 30 ish degrees. First we determine the size of our play area
@@ -52,6 +38,8 @@ export const tensorToGame = (input: CardGuess[]): Game => {
 	// Now we have all the cards assigned, and can make a Game with them
 	// We assign the top of the draw pile to the first card, unless it's a back card, then we do the second
 	const drawPile = new DrawPile(getDrawPile(foundationRow) ?? undefined);
+
+	throw new Error('TODO');
 };
 
 const getPlayArea = (input: CardGuess[]): Box => {
@@ -108,12 +96,12 @@ const getColumns = (cards: CardGuess[], playWidth: number): number => {
 
 const getDrawPile = (
 	from: Array<null | CardGuess>
-): [CardGuess] | undefined => {
+): [CardClass] | undefined => {
 	const [first, second] = from;
 	if (first && first.values?.[0]?.back !== true) {
-		return [first];
+		return [new CardClass(first)];
 	}
 	if (second && second.values?.[0]?.back !== true) {
-		return [second];
+		return [new CardClass(second)];
 	}
 };
