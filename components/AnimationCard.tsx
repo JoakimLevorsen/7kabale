@@ -60,7 +60,7 @@ export default ({
 	const cardStyle: ViewStyle = {
 		borderColor: 'black',
 		borderWidth: 1,
-		borderRadius: 2,
+		borderRadius: 5,
 		height: myHeight,
 		width: myWidth,
 		position: 'absolute',
@@ -75,13 +75,14 @@ export default ({
 			<View style={cardStyle}>
 				{visible && (
 					<>
+						<CustomText textAlign="left" flex={0}>
+							{' '}
+							{card.value.toString().substr(0, 1)}
+						</CustomText>
 						<Image
 							style={{ height: 20, width: 20 }}
 							source={iconForSuit(card.suit, 'Colored')}
 						/>
-						<CustomText>
-							{card.value.toString().substr(0, 1)}
-						</CustomText>
 					</>
 				)}
 			</View>
@@ -144,13 +145,14 @@ export default ({
 		>
 			{
 				<>
+					<CustomText textAlign="left" flex={0}>
+						{' '}
+						{card.value.toString().substr(0, 1)}
+					</CustomText>
 					<Image
 						style={{ height: 20, width: 20 }}
 						source={iconForSuit(card.suit, 'Colored')}
 					/>
-					<CustomText>
-						{card.value.toString().substr(0, 1)}
-					</CustomText>
 				</>
 			}
 		</Animated.View>

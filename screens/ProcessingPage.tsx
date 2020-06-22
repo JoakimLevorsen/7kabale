@@ -47,13 +47,6 @@ const initualUnsureCards: UnsureCard[] = [
 		height: 300,
 		width: 600,
 	},
-	{
-		estimated: { suit: 'Club', value: 9 },
-		x: 800,
-		y: 800,
-		height: 300,
-		width: 200,
-	},
 ];
 
 export default ({ route }: Props) => {

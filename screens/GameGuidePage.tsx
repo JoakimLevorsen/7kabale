@@ -6,6 +6,7 @@ import { AppStackParamList } from '../AppNavigator';
 import { Game } from '../scripts/suggestMove';
 import AnimationView from '../components/AnimationView';
 import { Colors } from '../constants';
+import RedButton from '../components/RedButton';
 
 type NavProp = StackNavigationProp<AppStackParamList>;
 
@@ -17,13 +18,17 @@ export default () => {
 		<View
 			style={{
 				alignItems: 'center',
+				justifyContent: 'space-between',
 				flex: 1,
 				backgroundColor: Colors.green,
 				width: '100%',
+				paddingBottom: 30,
+				paddingHorizontal: 20,
 			}}
 		>
+			<View style={{ flex: 1 }} />
 			<AnimationView game={game} />
-			<Button title="GoBack" onPress={() => navigation.popToTop()} />
+			<RedButton title="Go Back" onPress={() => navigation.popToTop()} />
 		</View>
 	);
 };
