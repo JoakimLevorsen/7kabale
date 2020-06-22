@@ -16,6 +16,17 @@ import * as SecureStore from 'expo-secure-store';
 import Tutorial from './Tutorial';
 import RedButton from '../components/RedButton';
 import Colors from '../constants/Colors';
+import {
+	doImage,
+	doTensor,
+	_model,
+	tensorFromServer,
+} from '../scripts/tensorTools';
+import { cameraWithTensors } from '@tensorflow/tfjs-react-native';
+import { Tensor3D, tensor4d, Tensor4D, tensor1d } from '@tensorflow/tfjs';
+import { wait } from '../scripts/wait';
+
+const TensorCamera = cameraWithTensors(Camera);
 
 /* TODO:
 - Lav en simpel loading anim der popper op onpress før navigation (der går lige et sekund inden skærmskifte)
@@ -65,6 +76,45 @@ export default () => {
 				ref={ref => {
 					camera = ref;
 				}}
+				// cameraTextureHeight={1920}
+				// cameraTextureWidth={1080}
+				// resizeHeight={500}
+				// resizeWidth={500}
+				// resizeDepth={3}
+				// onReady={images => {
+				// 	const loop = async () => {
+				// 		console.log('Doing');
+				// 		await wait(1000);
+				// 		// if (_model !== null) {
+				// 		const nextImageTensor = images.next().value as Tensor3D;
+				// 		const raw = await nextImageTensor.toInt().array();
+				// 		console.log('raw is', [
+				// 			raw.length,
+				// 			raw[0].length,
+				// 			raw[0][0].length,
+				// 		]);
+				// 		const combined = tensor4d(
+				// 			[raw],
+				// 			[1, 500, 500, 3],
+				// 			'int32'
+				// 		);
+				// 		doTensor(combined);
+				// 		// console.log('slice is', pureData.slice(0, 100));
+				// 		// console.log('')
+				// 		// We transform this array into the correct size
+				// 		// console.log(
+				// 		// 	'got tensor',
+				// 		// 	JSON.stringify(nextImageTensor.dataSync())
+				// 		// );
+				// 		return;
+
+				// 		await doImage(nextImageTensor);
+				// 		// } else console.log('ignoring for now');
+				// 		// requestAnimationFrame(loop)
+				// 	};
+				// 	loop();
+				// }}
+				// autorender
 			>
 				<View style={[styles.container, styles.buttonView]}>
 					<RedButton
@@ -78,6 +128,11 @@ export default () => {
 							let photo = await camera?.takePictureAsync({
 								base64: true,
 							})!;
+							// console.log('Started tensorflow', photo.uri);
+							// doImage(photo).catch((e: Error) =>
+							// 	console.error('Network error', e.message)
+							// );
+							// console.log('Did');
 							navigation.navigate('ChoozPic', { photo });
 						}}
 					>

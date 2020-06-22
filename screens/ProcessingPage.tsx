@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import {
-	ImageBackground,
 	View,
 	ActivityIndicator,
 	StyleSheet,
 	Animated,
 	FlatList,
 	Image,
+	Dimensions,
 } from 'react-native';
 import { RouteProp, useNavigation } from '@react-navigation/native';
 import { AppStackParamList, NavStack } from '../AppNavigator';
@@ -19,21 +19,129 @@ import {
 	allSuits,
 	allCardTypes,
 	suitIcons,
+	Card,
 } from '../types/Card';
+import firebase from 'firebase';
+import 'firebase/storage';
+import { v1 as uuid } from 'uuid';
+import { Frame } from '../types/Frame';
+import SelectionItem from '../components/SelectionItem';
 
 interface Props {
 	route: RouteProp<AppStackParamList, 'Loading'>;
 }
 
+interface UnsureCard {
+	estimated: Card;
+	x: number;
+	y: number;
+	height: number;
+	width: number;
+}
+
+const initualUnsureCards: UnsureCard[] = [
+	{
+		estimated: { suit: 'Club', value: 9 },
+		x: 100,
+		y: 500,
+		height: 300,
+		width: 600,
+	},
+];
+
 export default ({ route }: Props) => {
 	const photo = route.params.photo;
-	const [identifyAnimation, setIndentifyAnimation] = useState(
-		new Animated.Value(0)
-	);
-	const navigation = useNavigation<NavStack>();
 
-	const [identifiedType, setIdentifiedType] = useState<CardType>('Ace');
-	const [identifiedSuit, setIdentifiedSuit] = useState<Suit>('Club');
+	// Transform image space, to screen space
+	const transformCoordinates = ({ x, y, height, width }: Frame): Frame => {
+		const imageSize = { height: photo.height, width: photo.width };
+		const screenSize = Dimensions.get('window');
+		const heightRatio = screenSize.height / imageSize.height;
+		const widthRatio = screenSize.width / imageSize.width;
+		if (heightRatio === widthRatio) {
+			// If this is the case, we just "scale" the coordinates, since the image perfectly fits the screen
+			return {
+				x: x * heightRatio,
+				y: y * widthRatio,
+				height: height * heightRatio,
+				width: width * widthRatio,
+			};
+		} else if (heightRatio > widthRatio) {
+			// This means that this image is taller than the screen, so we add side padding to compensate
+			const expectedWidth =
+				(screenSize.height / imageSize.height) * imageSize.width;
+			const paddingNeeded = (screenSize.width - expectedWidth) / 2;
+			return {
+				x: x * heightRatio,
+				y: y * widthRatio + paddingNeeded,
+				height: height * heightRatio,
+				width: width * widthRatio + paddingNeeded,
+			};
+		} else {
+			// This means the image is wider than the screen, so we add top and bottom padding
+			const expectedHeight =
+				(screenSize.width / imageSize.width) * imageSize.height;
+			const paddingNeeded = (screenSize.height - expectedHeight) / 2;
+			return {
+				x: Math.round(x * heightRatio + paddingNeeded),
+				y: Math.round(y * widthRatio),
+				height: Math.round(height * heightRatio + paddingNeeded),
+				width: Math.round(width * widthRatio),
+			};
+		}
+	};
+
+	const [identifyAnimation] = useState(new Animated.Value(0));
+	const [imageAnimation] = useState(new Animated.Value(0));
+	const navigation = useNavigation<NavStack>();
+	const [unsureIndex, setUnsureIndex] = useState(0);
+	const [unsureCards, setUnsureCards] = useState<UnsureCard[]>(
+		initualUnsureCards.map(({ x, y, height, width, ...other }) => ({
+			...transformCoordinates({ x, y, height, width }),
+			...other,
+		}))
+	);
+	const currentCard = unsureCards[unsureIndex].estimated;
+	const [editMode, setEditMode] = useState(false);
+
+	const goToNextUnsure = () => {
+		if (unsureCards.length === unsureIndex + 1) {
+			navigation.navigate('GameGuidePage');
+		} else {
+			const target = unsureCards[unsureIndex];
+			setUnsureIndex(unsureIndex + 1);
+			// We now animate the top of the view to the image
+		}
+	};
+
+	const firebaseDestination = (endFile: string) =>
+		`${firebase.auth().currentUser?.uid ?? 'NOUSER'}/${uuid()}/${endFile}`;
+
+	const uploadToFirebase = () =>
+		photo.base64
+			? Promise.all([
+					firebase
+						.storage()
+						.ref(firebaseDestination('photo.jpeg'))
+						.putString(photo.base64, 'base64'),
+					firebase
+						.storage()
+						.ref(firebaseDestination('data.json'))
+						.putString(
+							// FIX: Add correct object
+							JSON.stringify(unsureCards)
+						),
+			  ])
+			: Promise.reject('Invalid photo');
+
+	const updateCurrentCard = (item: Partial<UnsureCard>) => {
+		const newUnsure = [...unsureCards];
+		newUnsure[unsureIndex] = {
+			...newUnsure[unsureIndex],
+			...item,
+		};
+		setUnsureCards(newUnsure);
+	};
 
 	useEffect(() => {
 		setTimeout(
@@ -47,10 +155,37 @@ export default ({ route }: Props) => {
 	}, []);
 
 	return (
-		<ImageBackground source={photo} style={styles.container}>
-			<View style={styles.spinnerContainer}>
+		<View style={styles.container}>
+			<Animated.Image
+				style={[
+					styles.image,
+					{
+						transform: [
+							{
+								translateY: imageAnimation.interpolate({
+									inputRange: [0, 1000],
+									outputRange: [0, -1000],
+								}),
+							},
+						],
+					},
+				]}
+				source={photo}
+			/>
+			{/* <View style={styles.spinnerContainer}>
 				<ActivityIndicator size="large" />
-			</View>
+			</View> */}
+			{unsureCards.map((uC, i) => (
+				<SelectionItem
+					key={i}
+					position={uC}
+					editable={editMode && unsureIndex === i}
+					active={unsureIndex === i}
+					card={uC.estimated.value}
+					suit={uC.estimated.suit}
+					setPosition={position => updateCurrentCard(position)}
+				/>
+			))}
 			<Animated.View
 				style={[
 					styles.identifyView,
@@ -78,7 +213,7 @@ export default ({ route }: Props) => {
 						fontSize={FontSize.header}
 						textAlign="left"
 					>
-						Er dette {identifiedSuit} {identifiedType}?
+						Er dette {currentCard.suit} {currentCard.value}?
 					</CustomText>
 					<TouchableOpacity
 						style={{
@@ -90,11 +225,68 @@ export default ({ route }: Props) => {
 							borderRadius: 20,
 							marginRight: 10,
 						}}
-						onPress={() => navigation.navigate('GameGuidePage')}
+						onPress={() =>
+							setUnsureCards([
+								...unsureCards,
+								{
+									x: 100,
+									y: 100,
+									height: 200,
+									width: 200,
+									estimated: {
+										suit: 'Diamond',
+										value: 'Ace',
+									},
+								},
+							])
+						}
 					>
-						<Image
-							source={require('../assets/arrowForwardWhite.png')}
-						/>
+						<CustomText flex={0} color={Colors.white}>
+							Add
+						</CustomText>
+					</TouchableOpacity>
+					<TouchableOpacity
+						style={{
+							height: 40,
+							width: 40,
+							justifyContent: 'center',
+							alignItems: 'center',
+							backgroundColor: Colors.black,
+							borderRadius: 20,
+							marginRight: 10,
+						}}
+						onPress={() => {
+							Animated.timing(identifyAnimation, {
+								toValue: editMode ? 1 : 0.5,
+							}).start();
+							setEditMode(!editMode);
+						}}
+					>
+						<CustomText flex={0} color={Colors.white}>
+							Edit
+						</CustomText>
+					</TouchableOpacity>
+					<TouchableOpacity
+						style={{
+							height: 40,
+							width: 40,
+							justifyContent: 'center',
+							alignItems: 'center',
+							backgroundColor: Colors.black,
+							borderRadius: 20,
+							marginRight: 10,
+						}}
+						onPress={() => goToNextUnsure()}
+					>
+						{unsureIndex === unsureCards.length - 1 ? (
+							<Image
+								source={require('../assets/checkWhite.png')}
+							/>
+						) : (
+							<Image
+								source={require('../assets/arrowForwardWhite.png')}
+							/>
+						)}
 					</TouchableOpacity>
 				</View>
 				<View
@@ -113,13 +305,20 @@ export default ({ route }: Props) => {
 								justifyContent: 'center',
 								alignItems: 'center',
 								backgroundColor:
-									suit === identifiedSuit
+									suit === currentCard.suit
 										? Colors.green
 										: Colors.black,
 								borderRadius: 35,
 								marginRight: 10,
 							}}
-							onPress={() => setIdentifiedSuit(suit)}
+							onPress={() =>
+								updateCurrentCard({
+									estimated: {
+										suit,
+										value: currentCard.value,
+									},
+								})
+							}
 						>
 							<Image
 								style={{ height: 50, width: 50 }}
@@ -131,11 +330,18 @@ export default ({ route }: Props) => {
 				<FlatList
 					style={{ marginHorizontal: 10 }}
 					data={allCardTypes}
-					keyExtractor={v => v}
+					keyExtractor={v => v.toString()}
 					renderItem={({ item }) => (
 						<TouchableOpacity
 							key={item}
-							onPress={() => setIdentifiedType(item)}
+							onPress={() =>
+								updateCurrentCard({
+									estimated: {
+										suit: currentCard.suit,
+										value: item,
+									},
+								})
+							}
 							style={{ padding: 10, flexDirection: 'row' }}
 						>
 							<CustomText textAlign="left">{item}</CustomText>
@@ -145,12 +351,12 @@ export default ({ route }: Props) => {
 									width: 40,
 									borderRadius: 20,
 									backgroundColor:
-										item === identifiedType
+										item === currentCard.value
 											? Colors.green
 											: Colors.black,
 								}}
 							>
-								{item === identifiedType && (
+								{item === currentCard.value && (
 									<Image
 										source={require('../assets/checkWhite.png')}
 									/>
@@ -160,7 +366,7 @@ export default ({ route }: Props) => {
 					)}
 				/>
 			</Animated.View>
-		</ImageBackground>
+		</View>
 	);
 };
 
@@ -169,6 +375,19 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
+	},
+	image: {
+		flex: 1,
+		resizeMode: 'contain',
+	},
+	cardHightligt: {
+		position: 'absolute',
+		borderWidth: 2,
+		borderColor: 'yellow',
+		top: -5,
+		height: Dimensions.get('window').height,
+		right: -5,
+		left: -5,
 	},
 	spinnerContainer: {
 		height: 80,

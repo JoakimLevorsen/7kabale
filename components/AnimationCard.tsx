@@ -3,18 +3,21 @@ import { Animated, View, Image, Dimensions, ViewStyle } from 'react-native';
 import CustomText from './CustomText';
 import { Card, Suit, iconForSuit } from '../types/Card';
 import { Colors } from '../constants';
+import { Move, Game } from '../scripts/suggestMove';
 
 interface Props {
 	row: 0 | 1;
 	card: Card;
 	column: number;
 	columnIndex?: number;
-	animationTarget?: {
-		row: number;
-		column: number;
-		columnIndex?: number;
-	};
-	visible: boolean;
+	animationTarget?: Move;
+	// animationTarget?: {
+	// 	row: number;
+	// 	column: number;
+	// 	columnIndex?: number;
+	// };
+	visible?: boolean;
+	game: Game;
 }
 
 export default ({
@@ -23,6 +26,7 @@ export default ({
 	column,
 	columnIndex = 0,
 	animationTarget,
+	game,
 	visible = false,
 }: Props) => {
 	const [moveAnimation] = useState(new Animated.Value(0));
@@ -32,11 +36,11 @@ export default ({
 				Animated.sequence([
 					Animated.timing(moveAnimation, {
 						toValue: 1,
-						duration: 500,
+						duration: 1000,
 					}),
 					Animated.timing(moveAnimation, {
 						toValue: 0,
-						duration: 500,
+						duration: 1000,
 					}),
 				])
 			).start();
@@ -51,15 +55,18 @@ export default ({
 	// Now we find the effective height
 	const myHeight = (myWidth / 300) * 460;
 	// We set the expected height, and add the offset
-	const y = 10 + row * (myHeight * 10) + columnIndex * 20;
+	const y = 100 + row * (myHeight + 10) + columnIndex * 20;
 
 	const cardStyle: ViewStyle = {
+		borderColor: 'black',
+		borderWidth: 1,
+		borderRadius: 5,
 		height: myHeight,
 		width: myWidth,
 		position: 'absolute',
 		top: y,
 		left: x,
-		backgroundColor: visible ? Colors.red : undefined,
+		backgroundColor: Colors.white,
 	};
 
 	// We don't need an animated view if we don't animate
@@ -68,8 +75,14 @@ export default ({
 			<View style={cardStyle}>
 				{visible && (
 					<>
-						<Image source={iconForSuit(card.suit)} />
-						<CustomText>{card.value}</CustomText>
+						<CustomText textAlign="left" flex={0}>
+							{' '}
+							{card.value.toString().substr(0, 1)}
+						</CustomText>
+						<Image
+							style={{ height: 20, width: 20 }}
+							source={iconForSuit(card.suit, 'Colored')}
+						/>
 					</>
 				)}
 			</View>
@@ -77,11 +90,33 @@ export default ({
 	}
 
 	// Now we do the calculation to interpolate the animation
-	const targetX = 10 + animationTarget.column * (myWidth + 10);
+	const getTargetRow = (move: Move) => {
+		if (move.to.pile === 'play') return 1;
+		if (move.to.pile === 'draw' && move.from.pile === 'draw') return -0.5;
+		return 0;
+	};
+	const getTargetColumn = (move: Move) => {
+		if (move.to.pile === 'draw') return 0;
+		if (move.to.pile === 'foundation') return 3 + move.to.index;
+		return move.to.index;
+	};
+	const targetColumn = getTargetColumn(animationTarget);
+	const targetRow = getTargetRow(animationTarget);
+	// We get the targetPile
+	const targetPile =
+		animationTarget.to.pile === 'draw'
+			? game.drawPile
+			: animationTarget.to.pile === 'foundation'
+			? game.foundationPiles[animationTarget.to.index]
+			: game.playPiles[animationTarget.to.index];
+	const targetColumnIndex =
+		targetPile.size + (animationTarget.amount ?? 1) - 1;
+
+	console.log('Target is', { targetColumn, targetRow, targetColumnIndex });
+
+	const targetX = 10 + targetColumn * (myWidth + 10);
 	const targetY =
-		10 +
-		animationTarget.row * (myHeight + 10) +
-		(animationTarget.columnIndex ?? 0) * 20;
+		100 + targetRow * (myHeight + 10) + (targetColumnIndex ?? 0) * 20;
 	const deltaX = targetX - x;
 	const deltaY = targetY - y;
 
@@ -90,6 +125,7 @@ export default ({
 			style={[
 				cardStyle,
 				{
+					zIndex: 10,
 					transform: [
 						{
 							translateX: moveAnimation.interpolate({
@@ -107,12 +143,18 @@ export default ({
 				},
 			]}
 		>
-			{visible && (
+			{
 				<>
-					<Image source={iconForSuit(card.suit)} />
-					<CustomText>{card.value}</CustomText>
+					<CustomText textAlign="left" flex={0}>
+						{' '}
+						{card.value.toString().substr(0, 1)}
+					</CustomText>
+					<Image
+						style={{ height: 20, width: 20 }}
+						source={iconForSuit(card.suit, 'Colored')}
+					/>
 				</>
-			)}
+			}
 		</Animated.View>
 	);
 };
