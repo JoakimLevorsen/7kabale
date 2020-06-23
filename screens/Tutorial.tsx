@@ -66,25 +66,25 @@ export default class Tutorial extends React.Component<Props> {
 					color={Colors.white}
 					flex={0}
 				>
-					Introduktion
+					Introduction
 				</CustomText>
 				<CardView
 					number={1}
-					text="Tag et billede af din kabale"
+					text="Take a picture of your solitaire game"
 					image={require('../assets/cameraRed.png')}
 					animation={firstCardAnim}
 					outputRange={[500, 0, -60]}
 				/>
 				<CardView
 					number={2}
-					text="Bekræft kabalen er synlig"
+					text="Confirm that the entire solitaire game is visible"
 					image={require('../assets/eyeRed.png')}
 					animation={secondCardAnim}
 					outputRange={[500, 0, -60]}
 				/>
 				<CardView
 					number={3}
-					text="Sørg for god afstand mellem kort"
+					text="Make sure there's a proper distance between cards"
 					image={require('../assets/eyeRed.png')}
 					centerImage={require('../assets/cardInstructions.jpg')}
 					animation={thirdCardAnim}
@@ -92,7 +92,7 @@ export default class Tutorial extends React.Component<Props> {
 				/>
 				<CardView
 					number={4}
-					text="Gør som appen anbefaler"
+					text="Do as the app recommends"
 					image={require('../assets/gavelRed.png')}
 					animation={fourthCardAnim}
 					outputRange={[500, 0, -60]}
@@ -103,7 +103,7 @@ export default class Tutorial extends React.Component<Props> {
 				/>
 				<RedButton
 					style={{ marginTop: 20 }}
-					title={this.state.animationState >= 3 ? 'Færdig' : 'Næste'}
+					title={this.state.animationState >= 3 ? 'Done' : 'Next'}
 					onPress={() => {
 						const animationState = this.state.animationState + 1;
 						switch (animationState) {

@@ -213,7 +213,7 @@ export default ({ route }: Props) => {
 						fontSize={FontSize.header}
 						textAlign="left"
 					>
-						Er dette {currentCard.suit} {currentCard.value}?
+						Is this the {currentCard.value} of {currentCard.suit}?
 					</CustomText>
 					<TouchableOpacity
 						style={{

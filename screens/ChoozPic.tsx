@@ -22,19 +22,19 @@ export default ({ route }: Props) => {
 		<View style={styles.container}>
 			<Image source={photo} style={styles.photo}></Image>
 			<CustomText style={styles.amazingText}>
-				Er billedet i fokus og inkluderer alle kort?
+				Is the picture in focus and does it include all cards?
 			</CustomText>
 			<View style={styles.horizontalView}>
 				<RedButton
 					style={styles.smallerButtons}
-					title="NEJ"
+					title="NO"
 					onPress={() => {
 						navigation.navigate('Main');
 					}}
 				/>
 				<RedButton
 					style={styles.smallerButtons}
-					title="JA"
+					title="YES"
 					onPress={() => navigation.navigate('Loading', { photo })}
 				/>
 			</View>
