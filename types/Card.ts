@@ -42,7 +42,7 @@ export const iconForSuit = (
 		case 'Diamond':
 			return color === 'White'
 				? require('../assets/diamondsWhite.png')
-				: require('../assets/diamondsBlack.png');
+				: require('../assets/diamondsRed.png');
 		case 'Heart':
 			return color === 'White'
 				? require('../assets/heartWhite.png')
@@ -50,6 +50,6 @@ export const iconForSuit = (
 		case 'Spade':
 			return color === 'White'
 				? require('../assets/spadesWhite.png')
-				: require('../assets/spadesRed.png');
+				: require('../assets/spadesBlack.png');
 	}
 };
