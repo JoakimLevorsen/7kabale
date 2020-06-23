@@ -28,6 +28,7 @@ export default class Tutorial extends React.Component<Props> {
 		firstCardAnim: new Animated.Value(0),
 		secondCardAnim: new Animated.Value(0),
 		thirdCardAnim: new Animated.Value(0),
+		fourthCardAnim: new Animated.Value(0),
 		animationState: 1,
 	};
 
@@ -43,7 +44,12 @@ export default class Tutorial extends React.Component<Props> {
 	};
 
 	render = () => {
-		const { firstCardAnim, secondCardAnim, thirdCardAnim } = this.state;
+		const {
+			firstCardAnim,
+			secondCardAnim,
+			thirdCardAnim,
+			fourthCardAnim,
+		} = this.state;
 
 		return (
 			<SafeAreaView
@@ -78,9 +84,17 @@ export default class Tutorial extends React.Component<Props> {
 				/>
 				<CardView
 					number={3}
+					text="Sørg for god afstand mellem kort"
+					image={require('../assets/eyeRed.png')}
+					centerImage={require('../assets/cardInstructions.jpg')}
+					animation={thirdCardAnim}
+					outputRange={[500, 0, -60]}
+				/>
+				<CardView
+					number={4}
 					text="Gør som appen anbefaler"
 					image={require('../assets/gavelRed.png')}
-					animation={thirdCardAnim}
+					animation={fourthCardAnim}
 					outputRange={[500, 0, -60]}
 				/>
 				<Spacer
@@ -124,6 +138,18 @@ export default class Tutorial extends React.Component<Props> {
 								]).start();
 								break;
 							case 4:
+								Animated.parallel([
+									Animated.timing(thirdCardAnim, {
+										toValue: 2,
+										duration: 300,
+									}),
+									Animated.timing(fourthCardAnim, {
+										toValue: 1,
+										duration: 300,
+									}),
+								]).start();
+								break;
+							case 5:
 								this.props.navigation.navigate('Main');
 						}
 						this.setState({ animationState });

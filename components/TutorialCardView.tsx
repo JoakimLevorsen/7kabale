@@ -15,11 +15,19 @@ interface Props {
 	text: string;
 	number: number;
 	image: ImageProps['source'];
+	centerImage?: ImageProps['source'];
 	animation: Animated.Value;
 	outputRange: [number, number, number];
 }
 
-export default ({ text, image, animation, outputRange, number }: Props) => (
+export default ({
+	text,
+	image,
+	animation,
+	outputRange,
+	number,
+	centerImage,
+}: Props) => (
 	<Animated.View
 		style={[
 			styles.container,
@@ -38,8 +46,8 @@ export default ({ text, image, animation, outputRange, number }: Props) => (
 		<View
 			style={{
 				flexDirection: 'row',
-				flex: 1,
-				height: 50,
+				flex: centerImage ? 0 : 1,
+				height: 80,
 			}}
 		>
 			<View
@@ -56,14 +64,26 @@ export default ({ text, image, animation, outputRange, number }: Props) => (
 			</View>
 			<Spacer />
 		</View>
+		{centerImage && (
+			<Image
+				style={{
+					flex: 1,
+					marginHorizontal: 10,
+					aspectRatio: 1328 / 1306,
+					maxWidth: '90%',
+				}}
+				resizeMode="contain"
+				source={centerImage}
+			/>
+		)}
 		<CustomText flex={0} fontSize={FontSize.header} color={Colors.red}>
 			{text}
 		</CustomText>
 		<View
 			style={{
 				flexDirection: 'row',
-				flex: 1,
-				height: 50,
+				flex: centerImage ? 0 : 1,
+				height: 80,
 				transform: [{ rotate: '180deg' }],
 			}}
 		>
@@ -92,5 +112,6 @@ const styles = StyleSheet.create({
 		shadowOffset: { height: 4, width: 0 },
 		padding: 10,
 		height: Dimensions.get('screen').height * 0.7,
+		alignItems: 'center',
 	},
 });
