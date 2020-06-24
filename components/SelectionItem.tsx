@@ -38,7 +38,7 @@ export default ({
 			flexDirection: 'row',
 			justifyContent: 'center',
 			alignItems: 'center',
-			zIndex: active && 10,
+			zIndex: active ? 10 : undefined,
 		}}
 	>
 		{editable && (

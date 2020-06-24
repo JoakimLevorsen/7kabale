@@ -137,11 +137,11 @@ export abstract class Pile {
 			: this.cards[this.cards.length - 1];
 	}
 
-	public add = (card: Card) =>
-		this.canAdd(card) ? this.cards.push(card) : null;
-
-	public addSeveral = (cards: Card[]) =>
-		this.canAdd(cards[0]) ? (this.cards = this.cards.concat(cards)) : null;
+	public add = (...card: Card[]) =>
+		card.forEach(c => {
+			if (this.canAdd(c)) this.cards.push(c);
+			throw new Error('Card cannot be added');
+		});
 
 	public removeTop = (): Card | undefined => this.cards.pop();
 
@@ -224,7 +224,7 @@ export class DrawPile extends Pile {
 			this.cards.length === 1 ? 0 : (this.index + 1) % this.cards.length);
 }
 
-function shuffle<T>(array: T[]): T[] {
+function shuffle<T extends Array<any>>(array: T): T {
 	var currentIndex = array.length,
 		temporaryValue,
 		randomIndex;
@@ -373,7 +373,7 @@ export class Game {
 						.reduce((pV, v) => `${pV} ${v}`)}
                     , stack is currently ${toPile.toString()}`
 				);
-			toPile.addSeveral(cards);
+			toPile.add(...cards);
 			/* console.log(
         `Moving ${cards
           .map((c) => c.toString())

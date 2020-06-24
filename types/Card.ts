@@ -1,4 +1,4 @@
-export const allSuits = ['Hearts', 'Clubs', 'Diamonds', 'Spades'] as const;
+export const allSuits = ['Heart', 'Club', 'Diamond', 'Spade'] as const;
 export type Suit = typeof allSuits[number];
 
 export const allCardTypes = [
